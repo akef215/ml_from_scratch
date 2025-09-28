@@ -2,11 +2,8 @@ import numpy as np
 
 class linear_regression:
     """
-    Linear Regression from scratch
+    An implementation of Multiple Linear Regression from scratch only using numpy
     Attributs : 
-        Train : the training set (numpy array of shape(n, m))
-        where n is the number of observations 
-        and m the number of features
         coef_ (numpy.ndarray): coefficients of Regression (numpy array (m,))
         bias_ (float): bias of Regression 
         history_ (list): the history of the costs in each iteration
