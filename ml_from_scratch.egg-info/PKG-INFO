@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: ml-from-scratch
+Version: 0.1
+Summary: Implémentations pédagogiques d'algorithmes de Machine Learning
+Author: ZENAGUI Mohamed Elakef
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: scikit-learn
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: summary

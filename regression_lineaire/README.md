@@ -16,7 +16,20 @@ This folder contains a **from-scratch implementation of Multiple Linear Regressi
 
 ---
 
-## Dependencies
+## Installation
+
+Clone the repository and put it in `regression_lineaire` folder: 
+
+git clone https://github.com/TON_UTILISATEUR/ml-from-scratch.git
+cd ml-from-scratch/regression_lineaire
+
+Create and activate a virtual environnement with :
+
+python3 -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows
+
+# Dependencies
 
 This project requires the following Python libraries:
 
@@ -27,5 +40,9 @@ This project requires the following Python libraries:
 
 Install them using:
 
-```bash
 pip install -r requirements.txt
+pip install -e .
+
+check the installation in Python or the notebook :
+
+from regression_lineaire.src.linear_regression import LinearRegression
