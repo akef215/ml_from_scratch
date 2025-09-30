@@ -114,7 +114,7 @@ class LinearRegression:
         -----
         For the mathematical derivation of the Normal Equation and 
         its ridge regularization extension, please refer to the 
-        accompanying LaTeX document: `normal_equation_theory.pdf`.
+        accompanying LaTeX document: `normal_equation_theory.pdf` in the docs folder.
 
         """
         if method == 'normal':
