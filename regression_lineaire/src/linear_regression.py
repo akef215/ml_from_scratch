@@ -73,9 +73,10 @@ class LinearRegression:
             w -= learning_rate*dW
             b -= learning_rate*dB
 
-            # ReScaling the coef
-            original_w = w*sigmaY/sigmaX
-            original_b = b*sigmaY + muY - np.dot(original_w, muX)
+            # ReScaling the coefficients and the bias to get the original values
+            original_w = w*sigmaY/sigmaX if normalise else w
+            original_b = b*sigmaY + muY - np.dot(original_w, muX) \
+            if normalise else b
 
             # Saving the trace of the cost function and stopping if the cost
             #  is sufficiently small or the cost is getting constant
@@ -157,3 +158,12 @@ class LinearRegression:
             A list of (cost, coef, bias) if self.fit called before. Null otherwise
         """
         return self.history_
+    
+    def get_params(self):
+        """
+          The getter method of the parameters of the model
+          Returns:
+            A tuple (coef, bias)
+        """
+        return self.coef_, self.bias_
+    
