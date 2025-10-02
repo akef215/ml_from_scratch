@@ -109,14 +109,6 @@ class LinearRegression:
         
         Returns:
             An object of LinearRegression so that we can apply the other methodes, mainly predict
-        
-        
-        Notes
-        -----
-        For the mathematical derivation of the Normal Equation and 
-        its ridge regularization extension, please refer to the 
-        accompanying LaTeX document: `normal_equation_theory.pdf` in the docs folder.
-
         """
         if method == 'normal':
             # The ridge coefficient to ensure that the normal equation 
