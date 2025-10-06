@@ -10,8 +10,8 @@ This folder contains a **from-scratch implementation of Multiple Linear Regressi
 ## Files
 
 - `./linear_regression.py` : Python implementation of the `LinearRegression` class.
-- `docs/normal_equation_theory.tex` : LaTeX document explaining the mathematical derivation of the Normal Equation and ridge regularization.
-- `docs/gradient_descent_theory.tex` : LaTeX document explaining the mathematical background of the Gradient Descent algorithm.
+<!--- `docs/normal_equation_theory.tex` : LaTeX document explaining the mathematical derivation of the Normal Equation and ridge regularization.
+- `docs/gradient_descent_theory.tex` : LaTeX document explaining the mathematical background of the Gradient Descent algorithm.-->
 - `examples/demo.ipynb` : A Jupyter Notebook illustrating the use of the LinearRegression class with visualizations and comparison with scikit-learn.
 
 ---

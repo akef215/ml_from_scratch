@@ -1,9 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
-class LinearRegression:
+class LogisticRegression:
     """
-    An implementation of Multiple Linear Regression from scratch only using numpy
+    An implementation of Logistic Regression from scratch only using numpy
     Constructor
     Attributs : 
         coef_ (numpy.ndarray): coefficients of Regression (numpy array (m,))
@@ -15,11 +14,21 @@ class LinearRegression:
         self.coef_ = None
         self.bias_ = 0
         self.history_ = []
-        self.method_ = "normal"
+
+    def _sigmoid(self, z):
+        """
+        Sigmoid function that maps any real value between 0 and 1
+        Args:
+            z (float or numpy.ndarray): The input value or array of values
+        Returns:
+            The sigmoid of z
+        """
+        return 1 / (1 + np.exp(-1 * z))
 
     def _cost(self, X, Y, w, b):
         """
-        Cost calculates the Mean Squared Error (MSE) of a given Training couple (X, Y)
+        Cost calculates the cross-entropy loss of a given Training
+        couple (X, Y)
         Args:
             X (numpy.ndarray): The training set (n_samples, n_features)
             Y (numpy.ndarray): The targets set (n_samples,)
@@ -29,10 +38,12 @@ class LinearRegression:
             The cost function of the model
         """
 
-        return np.mean((X @ w + b - Y)**2)/2
+        # To avoid log(0) which is undefined
+        Y_estimated = np.clip(self._sigmoid(X @ w + b), 1e-15, 1 - 1e-15)
+        return -1*np.mean(Y * np.log(Y_estimated) + (1 - Y) * np.log(1 - Y_estimated))
 
     def _gradient_descent(self, X_train, Y_train, learning_rate, max_iter, 
-                        normalise = True, epsilon = 1e-8):
+                        normalise = True, epsilon = 1e-5):
         """
         It calculates the local minima of a given function : X_train -> Y_train
         Args:
@@ -43,7 +54,7 @@ class LinearRegression:
             normalise (bool, optional): To chose whether we normalise the inputs or not
             Default is True
             epsilon (float, optional) : The tolerated error or dCost to stop the execution.
-            Default is e-8
+            Default is e-5
 
         Returns:
             original_w (numpy.ndarray): The parameters of Regression vector (n_features,)
@@ -53,32 +64,32 @@ class LinearRegression:
         """
 
         muX, sigmaX = np.mean(X_train, axis=0), np.std(X_train, axis=0)
-        muY, sigmaY = np.mean(Y_train), np.std(Y_train)
         sigmaX[sigmaX == 0] = 1
         # Normalisation (Z-score scaling):
         if normalise:
             X = (X_train - muX) / sigmaX
-            Y = (Y_train - muY) / sigmaY
         else:
-            X, Y = X_train, Y_train
-    
+            X = X_train
+        
+        Y = Y_train
         history = []
         w = np.zeros(X_train.shape[1])
         b = 0
         for i in range(max_iter):
             # residual represents the prediction of X
-            residual = X @ w + b - Y
-            # dW represents the partial derivative of the Cost function in respect to w
+            residual = self._sigmoid(X @ w + b) - Y
+            # dW represents the partial derivative of the Cost function
+            #  in respect to w
             dW = X.T @ residual / X.shape[0]
-            #dB represents the partial derivative of the cost function in respect to b 
+            # dB represents the partial derivative of the cost function 
+            # in respect to b 
             dB = np.mean(residual)
             w -= learning_rate*dW
             b -= learning_rate*dB
 
             # ReScaling the coefficients and the bias to get the original values
-            original_w = w*sigmaY/sigmaX if normalise else w
-            original_b = b*sigmaY + muY - np.dot(original_w, muX) \
-            if normalise else b
+            original_w = w/sigmaX if normalise else w
+            original_b = b - np.dot(original_w, muX) if normalise else b
 
             # Saving the trace of the cost function and stopping if the cost
             #  is sufficiently small or the cost is getting constant
@@ -88,7 +99,7 @@ class LinearRegression:
             if i > 0 and abs(history[-1][0] - history[-2][0]) < epsilon: break
         return original_w, original_b, history
     
-    def fit(self, X, Y, learning_rate=0.01, max_iter=1000, method='normal', ridge_coefficient = 1e-2,normalise = True):
+    def fit(self, X, Y, learning_rate=0.01, max_iter=1000, method='normal',normalise = True):
         """
           Train the model on the data X (Observations) 
           and Y (Labels)
@@ -100,48 +111,17 @@ class LinearRegression:
             Default is 0.01
             max_iter (int, optional): The maximum number of iterations
             Default is 1000
-            method (str, optional): the method using for regression it can be
-            'normal' for Normale Equation method or 'gradient' for 
-            Gradient Descent. Default is 'normal'
-            ridge_coefficient (float, optional): a float coefficient to ensure
-            that the normal equation admits a solution
-            Default is 1e-2
             normalise (bool, optional): To chose whether we normalise the inputs or not
             Default is True
         
         Returns:
-            An object of LinearRegression so that we can apply the other methodes, mainly predict
+            An object of LogisticRegression so that we can apply the other methodes, mainly predict
         
-        
-        Notes
-        -----
-        For the mathematical derivation of the Normal Equation and 
-        its ridge regularization extension, please refer to the 
-        accompanying LaTeX document: `normal_equation_theory.pdf` in the docs folder.
-
         """
-        self.method_ = method
-        if method == 'normal':
-            # The ridge coefficient to ensure that the normal equation 
-            # admits a solution
-            # Add a ones column to calulate the bias
-            X = np.hstack([np.ones((X.shape[0], 1)), X])
-            # Normal Formula with ridge
-            D = np.eye(X.shape[1])
-            # We don't ridge the bias
-            D[0, 0] = 0
-            # The solution of the normal equation
-            parameters = np.linalg.solve(X.T @ X + ridge_coefficient * D, X.T @ Y)
-            self.coef_ = parameters[1:]
-            self.bias_ = parameters[0]
-
-        elif method == 'gradient':
-            self.coef_, self.bias_, self.history_ = self._gradient_descent(X, Y, learning_rate, max_iter, normalise = normalise)
-        else:
-            raise ValueError("The method must be normal or gradient")
+        self.coef_, self.bias_, self.history_ = self._gradient_descent(X, Y, learning_rate, max_iter, normalise = normalise)
         return self
     
-    def predict(self, X):
+    def predict_proba(self, X):
         """
           Predict the output vector for a given Testing array
 
@@ -151,45 +131,22 @@ class LinearRegression:
         Returns:
             The vector of predictions
         """
-        return X @ self.coef_ + self.bias_
+        return self._sigmoid(X @ self.coef_ + self.bias_)
     
-    def plot_regression_1D(self, X_train, Y_train, Y_pred, method):
+    def predict(self, X, threshold=0.5):
         """
-          Plot the regression line along with the training data
+          Predict the output vector for a given Testing array
 
         Args:
-            X_train (numpy.ndarray): Training features (n_samples, n_features)
-            Y_train (numpy.ndarray): Targets targets (n_samples,)
-            Y_pred (numpy.ndarray): Predicted targets (n_samples,)
-            method (str): The method used for regression ('normal' or 'gradient')
-        """
-        plt.figure()
-        plt.scatter(X_train, Y_train, color='blue', alpha=0.5)
-        plt.plot(X_train, Y_pred, color='red')
-        plt.xlabel('Features')
-        plt.ylabel('Target')
-        plt.title("Linear Regression Model using " + method)
-        plt.show()
-    
-    def plot_cost_history(self):
-        """
-          Plot the cost function history if the model was trained using Gradient Descent
-
-        Raises:
-            ValueError: If the model was not trained using Gradient Descent
-        """
-        if self.method_ != 'gradient' or not self.history_:
-            raise ValueError("Cost history is only available for models trained " \
-            "using Gradient Descent.")
+            X (numpy.ndarray) : Testing array (n_samples, n_features)
+            threshold (float, optional): The threshold to classify the outputs
+            Default is 0.5      
         
-        costs = [entry[0] for entry in self.history_]
-        plt.figure()
-        plt.plot(range(len(costs)), costs)
-        plt.xlabel('Iteration')
-        plt.ylabel('Cost')
-        plt.title('Cost Function History')
-        plt.grid()
-        plt.show()
+        Returns:
+            The vector of predictions
+        """
+        proba = self.predict_proba(X)
+        return (proba >= threshold).astype(int)
     
     def get_history(self):
         """
