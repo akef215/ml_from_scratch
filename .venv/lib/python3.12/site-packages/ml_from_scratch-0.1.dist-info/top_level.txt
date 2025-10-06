@@ -1,2 +1,2 @@
-k_nearest_neighbours
 regression_lineaire
+regression_logistic

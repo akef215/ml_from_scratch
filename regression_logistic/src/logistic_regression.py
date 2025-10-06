@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class LogisticRegression:
     """
@@ -129,13 +130,14 @@ class LogisticRegression:
             X (numpy.ndarray) : Testing array (n_samples, n_features)
 
         Returns:
-            The vector of predictions
+            The vector of predictions probabilities
         """
         return self._sigmoid(X @ self.coef_ + self.bias_)
     
     def predict(self, X, threshold=0.5):
         """
           Predict the output vector for a given Testing array
+
 
         Args:
             X (numpy.ndarray) : Testing array (n_samples, n_features)
@@ -148,6 +150,93 @@ class LogisticRegression:
         proba = self.predict_proba(X)
         return (proba >= threshold).astype(int)
     
+    def plot_decision_boundary(self, X_train, Y_train):
+        """
+          Plot the boundary line along with the training data\
+            for a 2D logistic regression model.
+
+        Args:
+            X_train (numpy.ndarray): Training features (n_samples, 2)
+            Y_train (numpy.ndarray): Targets targets (n_samples,)
+        """
+        if X_train.shape[1] != 2:
+                raise ValueError("X_train must have exactly 2 features \
+                                 for 2D plotting.")
+        plt.figure()
+        class_0 = Y_train == 0
+        class_1 = Y_train == 1
+        plt.scatter(X_train[class_0, 0], X_train[class_0, 1], \
+                     color='blue', label='Class 0', alpha=0.5)
+        plt.scatter(X_train[class_1, 0], X_train[class_1, 1], \
+                    color='red', label='Class 1', alpha=0.5)
+        # Create a grid to plot the decision boundary
+        plt.plot(X_train[:, 0], -(self.coef_[0] * X_train[:, 0] + self.bias_)\
+                  / self.coef_[1], color='green', label='Decision Boundary')
+        plt.xlabel('Feature 1')
+        plt.ylabel('Feature 2')
+        plt.title("Logistic Regression Decision Boundary")
+        plt.legend()
+        plt.show()
+    
+    def plot_learning_curve(self):
+        """
+          Plot the cost function history 
+          Raises:
+            ValueError: If the model has not been trained yet
+        """
+        if not self.history_:
+            raise ValueError("Cost history is only available for models trained")
+        
+        costs = [entry[0] for entry in self.history_]
+        plt.figure()
+        plt.plot(range(len(costs)), costs)
+        plt.xlabel('Iteration')
+        plt.ylabel('Cost')
+        plt.title('Cost Function History')
+        plt.grid()
+        plt.show()
+    
+    def accuracy(self, Y_true, Y_pred):
+        """
+          Calculate the accuracy of the model
+          Args:
+            Y_true (numpy.ndarray): The true labels (n_samples,)
+            Y_pred (numpy.ndarray): The predicted labels (n_samples,)
+          Returns:
+            The accuracy of the model
+        """
+        return np.mean(Y_true == Y_pred)
+    
+    def recall(self, Y_true, Y_pred):
+        """
+          Calculate the recall of the model
+          Args:
+            Y_true (numpy.ndarray): The true labels (n_samples,)
+            Y_pred (numpy.ndarray): The predicted labels (n_samples,)
+          Returns:
+            The recall of the model
+        """
+        true_positives = np.sum((Y_true == 1) & (Y_pred == 1))
+        false_negatives = np.sum((Y_true == 1) & (Y_pred == 0))
+        if true_positives + false_negatives == 0:
+            return 0.0
+        return true_positives / (true_positives + false_negatives)
+    
+    def precision(self, Y_true, Y_pred):
+        """
+          Calculate the precision of the model
+          Args:
+            Y_true (numpy.ndarray): The true labels (n_samples,)
+            Y_pred (numpy.ndarray): The predicted labels (n_samples,)
+          Returns:
+            The precision of the model
+        """
+        true_positives = np.sum((Y_true == 1) & (Y_pred == 1))
+        false_positives = np.sum((Y_true == 0) & (Y_pred == 1))
+        if true_positives + false_positives == 0:
+            return 0.0
+        return true_positives / (true_positives + false_positives)
+
     def get_history(self):
         """
           The getter method of the history of the parameters of the model
