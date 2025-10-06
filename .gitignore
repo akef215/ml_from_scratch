@@ -10,3 +10,4 @@ Lib/*
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+docs/*
